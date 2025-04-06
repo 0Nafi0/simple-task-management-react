@@ -15,6 +15,7 @@ interface TaskStore {
   addATask: (task: Task) => void;
   markAsCompleted: (id: string) => void;
   deleteATask: (id: string) => void;
+  setTasksOnDrag: (tasks: Task[]) => void;
 }
 
 const useTaskStore = create<TaskStore>()(
@@ -35,6 +36,10 @@ const useTaskStore = create<TaskStore>()(
         set((state) => ({
           tasks: state.tasks.filter((task) => task.id !== id),
         })),
+      setTasksOnDrag: (tasks) =>
+        set({
+          tasks: tasks,
+        }),
     }),
     { name: "task-storage" }
   )

@@ -1,14 +1,26 @@
 import { TrashIcon } from "@heroicons/react/16/solid";
 import { CheckIcon } from "@heroicons/react/16/solid";
 import { useNavigate } from "react-router-dom";
+import { useRef } from "react";
 
 import useTaskStore from "../store";
 
 export default function HomePage() {
+  const draggedTask = useRef<number>(0);
+  const draggedOverTask = useRef<number>(0);
   const navigate = useNavigate();
   const tasks = useTaskStore((state) => state.tasks);
   const markAsCompleted = useTaskStore((state) => state.markAsCompleted);
   const deleteATask = useTaskStore((state) => state.deleteATask);
+  const setTasksOnDrag = useTaskStore((state) => state.setTasksOnDrag);
+
+  function handleSort() {
+    const taskClone = [...tasks];
+    const temp = taskClone[draggedTask.current];
+    taskClone[draggedTask.current] = taskClone[draggedOverTask.current];
+    taskClone[draggedOverTask.current] = temp;
+    setTasksOnDrag(taskClone);
+  }
 
   return (
     <div className="overflow-x-auto px-8 pt-20">
@@ -29,10 +41,18 @@ export default function HomePage() {
             </tr>
           </thead>
           <tbody>
-            {tasks.map((task, i) => {
+            {tasks.map((task, index) => {
               return (
-                <tr key={task.id} className="hover:bg-base-300">
-                  <th>{i + 1}</th>
+                <tr
+                  draggable
+                  onDragStart={() => (draggedTask.current = index)}
+                  onDragEnter={() => (draggedOverTask.current = index)}
+                  onDragEnd={handleSort}
+                  onDragOver={(e) => e.preventDefault()}
+                  key={task.id}
+                  className="hover:bg-base-300"
+                >
+                  <th>{index + 1}</th>
                   <td>{task.title}</td>
                   <td>{task.description}</td>
                   <td>{task.dueDate}</td>
